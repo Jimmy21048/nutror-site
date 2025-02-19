@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Home page</title>
+</head>
+<body>
+    <div class="left">
+        <form action="{% url 'classify' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="image">
+            <button>Upload</button>
+        </form>
+    </div>
+    <div class="right">
+        {% for class_id, label, probability in predictions %}
+            <p>Label {{ label }}</p>
+            <p>Probability {{ probability }}</p>
+        {% endfor %}
+
+        {{ nutrients }}
+    </div>
+</body>
+</html>
