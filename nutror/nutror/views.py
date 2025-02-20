@@ -2,12 +2,9 @@ from django.shortcuts import render
 from django.core.files.storage import default_storage
 from .ml_model import predict_image
 from .api_request import nutApi
-from .nutrients import nutrientsList
+from django.http import JsonResponse
 
 def homePage(request):
-    return render(request, 'home.html')
-
-def classify(request):
     if request.method == "POST" and request.FILES['image']:
         image_file = request.FILES['image']
         
@@ -16,9 +13,11 @@ def classify(request):
         predictions = predict_image(file_path)
         
         item = predictions[0][1]
+        prob = float(predictions[0][2]) #prob for probability
         
         nutrients = nutApi(item)
         
-        
-        return render(request, 'home.html', { "predictions" : predictions, "image_ulr" : file_path, "nutrients" : nutrients })
-    return render(request, 'home.html')
+        return JsonResponse({'nutrients' : nutrients, 'item' : item, 'prob' : prob})
+    
+    else :    
+        return render(request, 'home.html')

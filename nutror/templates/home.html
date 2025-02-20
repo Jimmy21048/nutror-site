@@ -9,11 +9,12 @@
 </head>
 <body>
     <div class="left">
-        <form action="{% url 'classify' %}" method="post" enctype="multipart/form-data">
+        <form id="form">
             {% csrf_token %}
-            <input type="file" name="image">
-            <button>Upload</button>
+            <input id="imageInput" type="file" name="image">
+            <button type="submit">Upload</button>
         </form>
+        <img id="imagePreview" src="" alt="my image" />
     </div>
     <div class="right">
         {% for class_id, label, probability in predictions %}
@@ -23,5 +24,44 @@
 
         {{ nutrients }}
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let form = document.getElementById("form")
+            form.addEventListener('submit', (e) => {
+                e.preventDefault()
+    
+                let formData = new FormData(form)
+    
+                fetch("{% url 'home' %}", {
+                    method: "POST",
+                    body: formData,
+                    headers : {
+                        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+                    }
+                }).then(response => response.json()).then(data => {
+                    console.log(data)
+                })
+            })
+
+            
+            document.getElementById('imageInput').addEventListener('change', (e) => {
+                const file = e.target.files[0]
+
+                if(file) {
+                    const reader = new FileReader()
+
+                    reader.onload = (e1) => {
+                        const image = document.getElementById('imagePreview')
+
+                        image.src = e1.target.result
+
+                    }
+                    reader.readAsDataURL(file)
+                    
+                }
+            })
+        })
+
+    </script>
 </body>
 </html>

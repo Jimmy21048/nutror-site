@@ -15,3 +15,8 @@ body {
 .right {
     width: 50%;
 }
+img {
+    height: 240px;
+    width: 240px;
+    object-fit: cover;
+}

@@ -18,6 +18,6 @@ def predict_image(img_path):
     img_array = keras.applications.efficientnet.preprocess_input(img_array)
 
     predictions = model.predict(img_array)
-    decoded_predictions = keras.applications.efficientnet.decode_predictions(predictions, top=2)[0]
+    decoded_predictions = keras.applications.efficientnet.decode_predictions(predictions, top=1)[0]
 
     return decoded_predictions
