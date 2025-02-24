@@ -1,5 +1,5 @@
 importantNutrients = {
-    208: {'name': "Calories", 'unit': "kcal", 'minValue': 10, 'benefit': "Provides energy"},
+    208: {'name': "Calories", 'unit': "kcal", 'minValue': 10, 'benefit': "Provides energy. Good for building weight and muscle"},
     203: {'name': "Protein", 'unit': "g", 'minValue': 5, 'benefit': "Builds and repairs tissues"},
     204: {'name': "Total Fat", 'unit': "g", 'minValue': 3, 'benefit': "Essential for cell function"},
     606: {'name': "Saturated Fat", 'unit': "g", 'minValue': 1, 'benefit': "Energy storage (limit intake)"},

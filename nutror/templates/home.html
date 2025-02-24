@@ -5,22 +5,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Home page</title>
 </head>
 <body>
     <div class="sidebar">
-        <h2>Nutrients Detection Model</h2>
+        <img class="banner" src="{% static 'images/logo.png' %}" alt="nutror logo">
+        
         <ul>
-            <li>New Chat</li>
-            <li>History</li>
-            <li>Settings</li>
+            <button id="new-chat">New Chat <i class="fa-solid fa-plus"></i></button>
+            <button class="settings">Settings <i class="fa-solid fa-gear"></i></button>
         </ul>
     </div>
     
     <div class="chat-container">
         <div class="chat-header">
-            <h3>Food Nutrients Detection Model</h3>
+            <h3>Nutror</h3>
         </div>
         <div class="chat-box" id="chat-box">
            
@@ -28,8 +29,8 @@
         <form id="form" class="chat-input" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" id="imageInput" name="image" style="display: none;">
-            <button type="button" id="upload-btn"  onclick="document.getElementById('imageInput').click();"><i class='bx bx-upload'></i></button>
-            <input type="text" id="user-input" name="text" placeholder="Andika Food Yako...">
+            <button type="button" id="upload-btn"  onclick="document.getElementById('imageInput').click();"><i class="fa-solid fa-image"></i></button>
+            <input type="text" autocomplete="off" id="user-input" name="text" placeholder="Andika Food Yako...">
             <button id="send-btn" type="submit"><i class='bx bx-send'></i></button>
         </form>
     </div>
@@ -37,7 +38,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const chatBox = document.getElementById('chat-box')
             let form = document.getElementById("form")
+            const newChat = document.getElementById('new-chat')
+            const userInput = document.getElementById('user-input')
+            const extraButton = document.createElement('button')
+            let nutrients
+            let extras
+
+            newChat.addEventListener('click', () => {
+                chatBox.innerHTML = ''
+            })
             form.addEventListener('submit', (e) => {
+                if (extraButton && chatBox.contains(extraButton)) {
+                    chatBox.removeChild(extraButton);
+                }
                 e.preventDefault()
 
                 //create a loading display
@@ -54,8 +67,9 @@
                         "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
                     }
                 }).then(response => response.json()).then(data => {
-                    console.log(data)
+                    userInput.disabled = false
 
+                    console.log(data)
                     chatBox.removeChild(load)
 
                     //preparing data rendering
@@ -75,20 +89,77 @@
                         `
                         chatBox.appendChild(notFood)
                     } else {
-                        const items = document.createElement('div')
-                        items.innerHTML = 
+                        nutrients = data.nutrients.benefits.sort((a,b) => b.value - a.value)
+                        extras = data.nutrients.extra.sort((a,b) => b.value - a.value)
+
+                        const foodItem = document.createElement('div')
+                        foodItem.innerHTML = `
+                            <h3>${data.item}</h3>
+                            <h4>Nutritional Composition</h4>
                         `
-                        <div>
-                            <h4>${ data.prob > 0.5 ? data.item : '' }</h4>
-                            <h4>${ data.prob > 0.5 ? 'Confidence: ' + Math.round(data.prob * 100) + '%' : '' } </h4>
-                            <h5>Nutrients per 100g</h5>
-                            <p>Calories: ${ Math.round((data.nutrients.f_calories * 100)/ data.nutrients.f_weight) } cal</p>
-                            <p>Carbohydrates: ${ Math.round((data.nutrients.f_carb * 100)/ data.nutrients.f_weight) }g</p>
-                            <p>Fat content: ${ Math.round((data.nutrients.f_fat * 100)/ data.nutrients.f_weight) }g</p>
-                            <p>Proteins: ${ Math.round((data.nutrients.f_protein * 100)/ data.nutrients.f_weight) }g</p>
-                        </div>
-                        `
-                        chatBox.appendChild(items)
+
+                        
+                        const table = document.createElement('table');
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>Nutrients</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                    <th>Benefits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${nutrients.map(item => `
+                                    <tr>
+                                        <td>${item.name}</td>
+                                        <td>${item.value}</td>
+                                        <td>${item.unit}</td>
+                                        <td>${item.benefit}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+                        const extraTable = document.createElement('table');
+                        extraTable.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>Nutrients</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                    <th>Benefits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${extras.map(item => `
+                                    <tr>
+                                        <td>${item.name}</td>
+                                        <td>${item.value}</td>
+                                        <td>${item.unit}</td>
+                                        <td>${item.benefit}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+
+                        extraButton.classList.add("button")
+                        extraButton.innerHTML = "EXTRA NUTRIENTS"
+                        
+                        if(data.prob > 0.8) {
+                            chatBox.appendChild(foodItem)
+                        }
+                        chatBox.appendChild(table)
+                        chatBox.appendChild(extraButton)
+
+                        extraButton.addEventListener('click', () => {
+                            if(extraButton && chatBox.contains(extraButton)) {
+                                chatBox.removeChild(extraButton)
+                            }
+
+
+                            chatBox.appendChild(extraTable)
+
+                        })
                     }
                 })
             })
@@ -107,6 +178,9 @@
                         image.classList.add("chat-image")
 
                         chatBox.appendChild(image)
+
+                        userInput.value = ''
+                        userInput.disabled = true
 
                     }
                     reader.readAsDataURL(file)

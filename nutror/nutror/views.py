@@ -5,7 +5,14 @@ from .api_request import nutApi
 from django.http import JsonResponse
 
 def homePage(request):
-    if request.method == "POST" and request.FILES['image']:
+    if request.POST.get('text'):
+        text = request.POST.get('text')
+        
+        nutrients = nutApi(text)
+        
+        return JsonResponse({'nutrients' : nutrients, 'item' : text, 'prob' : 0.99})
+    elif request.method == "POST" and request.FILES['image']:
+        
         image_file = request.FILES['image']
         
         

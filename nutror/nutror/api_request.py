@@ -29,6 +29,12 @@ def nutApi(q):
             for item in nut
                 if item['attr_id'] in importantNutrients and item['value'] > importantNutrients[item['attr_id']]['minValue']
         ]
+        
+        extra_nutrients = [
+            {**importantNutrients[item['attr_id']], 'value': item['value']}
+            for item in nut
+                if item['attr_id'] in importantNutrients and item['value'] < importantNutrients[item['attr_id']]['minValue']
+        ]
         nutrients_data = {
             'f_name' : data['foods'][0]['food_name'],
             'f_weight' : data['foods'][0]["serving_weight_grams"],
@@ -36,7 +42,8 @@ def nutApi(q):
             'f_fat' : data['foods'][0]["nf_total_fat"],
             'f_protein' : data['foods'][0]["nf_protein"],
             'f_carb' : data['foods'][0]["nf_total_carbohydrate"],
-            'benefits' : filtered_nutrients
+            'benefits' : filtered_nutrients,
+            'extra' : extra_nutrients
         }
         
         return nutrients_data
