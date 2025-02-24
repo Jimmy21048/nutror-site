@@ -4,31 +4,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Home page</title>
 </head>
 <body>
-    <div class="left">
-        <form id="form">
-            {% csrf_token %}
-            <input id="imageInput" type="file" name="image">
-            <button type="submit">Upload</button>
-        </form>
-        <img id="imagePreview" src="" alt="my image" />
+    <div class="sidebar">
+        <h2>Nutrients Detection Model</h2>
+        <ul>
+            <li>New Chat</li>
+            <li>History</li>
+            <li>Settings</li>
+        </ul>
     </div>
-    <div class="right">
-        {% for class_id, label, probability in predictions %}
-            <p>Label {{ label }}</p>
-            <p>Probability {{ probability }}</p>
-        {% endfor %}
-
-        {{ nutrients }}
+    
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>Food Nutrients Detection Model</h3>
+        </div>
+        <div class="chat-box" id="chat-box">
+           
+        </div>
+        <form id="form" class="chat-input" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" id="imageInput" name="image" style="display: none;">
+            <button type="button" id="upload-btn"  onclick="document.getElementById('imageInput').click();"><i class='bx bx-upload'></i></button>
+            <input type="text" id="user-input" name="text" placeholder="Andika Food Yako...">
+            <button id="send-btn" type="submit"><i class='bx bx-send'></i></button>
+        </form>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const chatBox = document.getElementById('chat-box')
             let form = document.getElementById("form")
             form.addEventListener('submit', (e) => {
                 e.preventDefault()
+
+                //create a loading display
+                const load = document.createElement('p')
+                load.textContent = "Loading..."
+                chatBox.appendChild(load)
     
                 let formData = new FormData(form)
     
@@ -40,6 +55,41 @@
                     }
                 }).then(response => response.json()).then(data => {
                     console.log(data)
+
+                    chatBox.removeChild(load)
+
+                    //preparing data rendering
+                    //none food items
+                    if(!data.nutrients) {
+                        const notFood = document.createElement('div')
+                        notFood.innerHTML = 
+                        `
+                        <div>
+                            <h2>The model is having problems identifying the food item</h2>
+                            <h3>Please try the following options for a fix</h3>
+                            <p>Upload a clear image</p>
+                            <p>With dimensions greater than 224x224 px</p>
+                            <p>The food item image should not be mixed with other items</p>
+                            <p>Provide the food name in the input field below</p>
+                        </div>
+                        `
+                        chatBox.appendChild(notFood)
+                    } else {
+                        const items = document.createElement('div')
+                        items.innerHTML = 
+                        `
+                        <div>
+                            <h4>${ data.prob > 0.5 ? data.item : '' }</h4>
+                            <h4>${ data.prob > 0.5 ? 'Confidence: ' + Math.round(data.prob * 100) + '%' : '' } </h4>
+                            <h5>Nutrients per 100g</h5>
+                            <p>Calories: ${ Math.round((data.nutrients.f_calories * 100)/ data.nutrients.f_weight) } cal</p>
+                            <p>Carbohydrates: ${ Math.round((data.nutrients.f_carb * 100)/ data.nutrients.f_weight) }g</p>
+                            <p>Fat content: ${ Math.round((data.nutrients.f_fat * 100)/ data.nutrients.f_weight) }g</p>
+                            <p>Proteins: ${ Math.round((data.nutrients.f_protein * 100)/ data.nutrients.f_weight) }g</p>
+                        </div>
+                        `
+                        chatBox.appendChild(items)
+                    }
                 })
             })
 
@@ -51,13 +101,15 @@
                     const reader = new FileReader()
 
                     reader.onload = (e1) => {
-                        const image = document.getElementById('imagePreview')
-
+                        const image = document.createElement('img')
                         image.src = e1.target.result
+                        image.alt = "nutror image"
+                        image.classList.add("chat-image")
+
+                        chatBox.appendChild(image)
 
                     }
                     reader.readAsDataURL(file)
-                    
                 }
             })
         })

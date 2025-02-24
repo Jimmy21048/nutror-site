@@ -8,6 +8,7 @@ def homePage(request):
     if request.method == "POST" and request.FILES['image']:
         image_file = request.FILES['image']
         
+        
         file_path = default_storage.save("uploads/" + image_file.name, image_file)
         
         predictions = predict_image(file_path)
