@@ -17,8 +17,11 @@ def homePage(request):
         
         
         file_path = default_storage.save("uploads/" + image_file.name, image_file)
+        # file_path = "uploads/" + image_file.name
         
         predictions = predict_image(file_path)
+        
+        default_storage.delete(file_path)
         
         item = predictions[0][1]
         prob = float(predictions[0][2]) #prob for probability
@@ -26,6 +29,7 @@ def homePage(request):
         nutrients = nutApi(item)
         
         return JsonResponse({'nutrients' : nutrients, 'item' : item, 'prob' : prob})
+         
     
     else :    
         return render(request, 'home.html')

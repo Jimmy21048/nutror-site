@@ -259,8 +259,18 @@ th:last-child, td:last-child {
     }
     .chat-box {
         padding: 5px;
+        max-width: 100vw;
+        overflow-x: hidden;
     }
     table {
         max-width: 98vw;
+        overflow: hidden;
+        font-size: 0.9rem;
+    }
+    td, th {
+        max-width: 25%;
+    }
+    ::-webkit-scrollbar {
+        width: 0px;
     }
 }

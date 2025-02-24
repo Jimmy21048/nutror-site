@@ -40,7 +40,7 @@
             let form = document.getElementById("form")
             const newChat = document.getElementById('new-chat')
             const userInput = document.getElementById('user-input')
-            const extraButton = document.createElement('button')
+            
             let nutrients
             let extras
 
@@ -48,8 +48,9 @@
                 chatBox.innerHTML = ''
             })
             form.addEventListener('submit', (e) => {
-                if (extraButton && chatBox.contains(extraButton)) {
-                    chatBox.removeChild(extraButton);
+                const btnExist = chatBox.querySelector('button')
+                if (btnExist) {
+                    chatBox.removeChild(btnExist);
                 }
                 e.preventDefault()
 
@@ -67,6 +68,7 @@
                         "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
                     }
                 }).then(response => response.json()).then(data => {
+                    const extraButton = document.createElement('button')
                     userInput.disabled = false
 
                     console.log(data)
@@ -100,6 +102,7 @@
 
                         
                         const table = document.createElement('table');
+                        const extraTable = document.createElement('table');
                         table.innerHTML = `
                             <thead>
                                 <tr>
@@ -111,27 +114,6 @@
                             </thead>
                             <tbody>
                                 ${nutrients.map(item => `
-                                    <tr>
-                                        <td>${item.name}</td>
-                                        <td>${item.value}</td>
-                                        <td>${item.unit}</td>
-                                        <td>${item.benefit}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        `;
-                        const extraTable = document.createElement('table');
-                        extraTable.innerHTML = `
-                            <thead>
-                                <tr>
-                                    <th>Nutrients</th>
-                                    <th>Value</th>
-                                    <th>Unit</th>
-                                    <th>Benefits</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${extras.map(item => `
                                     <tr>
                                         <td>${item.name}</td>
                                         <td>${item.value}</td>
@@ -155,10 +137,29 @@
                             if(extraButton && chatBox.contains(extraButton)) {
                                 chatBox.removeChild(extraButton)
                             }
-
+                            
+                            extraTable.innerHTML = `
+                                <thead>
+                                    <tr>
+                                        <th>Nutrients</th>
+                                        <th>Value</th>
+                                        <th>Unit</th>
+                                        <th>Benefits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${extras.map(item => `
+                                        <tr>
+                                            <td>${item.name}</td>
+                                            <td>${item.value}</td>
+                                            <td>${item.unit}</td>
+                                            <td>${item.benefit}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            `;
 
                             chatBox.appendChild(extraTable)
-
                         })
                     }
                 })
